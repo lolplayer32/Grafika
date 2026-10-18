@@ -124,23 +124,47 @@ namespace Szeminarium1
             CheckError("VAO letrehozasa es bindolasa");
 
             float[] vertexArray = new float[] {
-                -0.5f, -0.5f, 0.0f,
-                +0.5f, -0.5f, 0.0f,
-                 0.0f, +0.5f, 0.0f,
-                 1f, 1f, 0f
-            };
+                 0.0f,  0.0f, 0.0f,
+                -0.5f,  0.3f, 0.0f,
+                 0.0f,  0.6f, 0.0f,
+                 0.5f,  0.3f, 0.0f,
+
+                 0.0f,  0.0f, 0.0f,
+                -0.5f,  0.3f, 0.0f,
+                -0.5f, -0.3f, 0.0f,
+                 0.0f, -0.6f, 0.0f,
+
+                 0.0f,  0.0f, 0.0f,
+                 0.5f,  0.3f, 0.0f,
+                 0.5f, -0.3f, 0.0f,
+                 0.0f, -0.6f, 0.0f
+};
 
             float[] colorArray = new float[] {
-                1.0f, 0.0f, 0.0f, 1.0f,
-                0.0f, 1.0f, 0.0f, 1.0f,
-                0.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, 0.0f, 0.0f, 1.0f,
-            };
+                 0.8f, 0.8f, 0.8f, 1.0f,
+                 0.8f, 0.8f, 0.8f, 1.0f,
+                 0.8f, 0.8f, 0.8f, 1.0f,
+                 0.8f, 0.8f, 0.8f, 1.0f,
 
-            uint[] indexArray = new uint[] { 
-                0, 1, 2,
-                2, 1, 3
-            };
+                 0.6f, 0.6f, 0.6f, 1.0f,
+                 0.6f, 0.6f, 0.6f, 1.0f,
+                 0.6f, 0.6f, 0.6f, 1.0f,
+                 0.6f, 0.6f, 0.6f, 1.0f,
+
+                 0.6f, 0.5f, 0.8f, 1.0f,
+                 0.6f, 0.5f, 0.8f, 1.0f,
+                 0.6f, 0.5f, 0.8f, 1.0f,
+                 0.6f, 0.5f, 0.8f, 1.0f
+};
+
+            uint[] indexArray = new uint[] {
+                 0, 1, 2,
+                 0, 2, 3,
+                 4, 5, 6,
+                 4, 6, 7,
+                 8, 9, 10,
+                 8, 10, 11
+};
 
             uint vertices = Gl.GenBuffer();
             Gl.BindBuffer(GLEnum.ArrayBuffer, vertices);
