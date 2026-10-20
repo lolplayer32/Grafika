@@ -19,3 +19,16 @@ Eredmeny: A shader fordito hibat dobott. A program egy Exception kiserleteben le
 99.sor
 Mit csinaltam: Kevesebb elemet adtam meg a vertexArray tombben.
 Eredmeny: Ez nem OpenGL, hanem C# nyelvi hibat eredmenyezett. A program IndexOutOfRangeException hibat dobott.
+
+5. UseProgram kihagyasa
+161. sor
+Mit csinaltam: Kikommenteztem a `Gl.UseProgram(program);` sort a renderelesi ciklusban.
+Eredmeny: A rajzolasnal (DrawElements) az OpenGL InvalidOperation (1282) hibat dobott, mivel a rendszer nem tudja,
+	1. hogy melyik shader programot kene hasznalnia a csomopontok (vertexek) es szinek feldolgozasahoz, igy a kepernyo ures maradt.
+
+6. Helytelen tipus a DrawElements fuggvenyben
+164. sor
+Mit csinaltam: A `Gl.DrawElements` fuggveny harmadik parameteret (`GLEnum.UnsignedInt`) atirtam `GLEnum.Float`-ra.
+Eredmeny: Az OpenGL InvalidEnum (1280) hibat jelzett. Ennek az az oka, 
+1. hogy az index buffer tipusanak kizarolag egesz szamokat
+1. (pl. UnsignedByte, UnsignedShort, UnsignedInt) 1. fogad el az OpenGL, a lebegopontos (Float) ertek itt ervenytelen.
