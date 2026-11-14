@@ -258,5 +258,32 @@ namespace GrafikaSzeminarium
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        public unsafe void UpdateFrontFaceColor(System.Numerics.Vector4 newColor)
+        {
+            // Csatlakozunk a szín bufferhez
+            Gl.BindBuffer(GLEnum.ArrayBuffer, Colors);
+
+            // 4 csúcs színe alkot egy lapot (front face)
+            float[] colorData = new float[]
+            {
+        newColor.X, newColor.Y, newColor.Z, newColor.W,
+        newColor.X, newColor.Y, newColor.Z, newColor.W,
+        newColor.X, newColor.Y, newColor.Z, newColor.W,
+        newColor.X, newColor.Y, newColor.Z, newColor.W
+            };
+
+            // A front face a 2. lap a vertex tömbben, tehát index 4-től kezdődik.
+            // 4 csúcs * 4 float komponenens * 4 byte (float mérete) = 64 byte eltolás
+            nint offset = 4 * 4 * sizeof(float);
+
+            // Csak a memória ezen szeletét írjuk felül
+            Gl.BufferSubData(GLEnum.ArrayBuffer, offset, (nuint)(16 * sizeof(float)), (ReadOnlySpan<float>)colorData.AsSpan());
+
+            Gl.BindBuffer(GLEnum.ArrayBuffer, 0);
+        }
+
     }
+
+
 }

@@ -40,6 +40,12 @@ namespace GrafikaSzeminarium
 
         private static float shininess = 50;
 
+        private static Vector3 ambientStrength = new Vector3(0.1f, 0.1f, 0.1f);
+        private static Vector3 diffuseStrength = new Vector3(0.3f, 0.3f, 0.3f);
+        private static Vector3 specularStrength = new Vector3(0.6f, 0.6f, 0.6f);
+        private static Vector3 ambientLightColor = new Vector3(1.0f, 1.0f, 1.0f);
+        private static Vector4 frontFaceColor = new Vector4(0.0f, 1.0f, 0.0f, 1.0f); // Alapból zöld a front face
+
         private static uint program;
 
         static void Main(string[] args)
@@ -190,11 +196,17 @@ namespace GrafikaSzeminarium
 
             Gl.UseProgram(program);
 
-            // Fény beállítása a kamera pozíciójára, hogy mindig kívülről világítson
+            // Alap fény és kamera uniformok beállítása
             SetUniform3(LightColorVariableName, new Vector3(1f, 1f, 1f));
             SetUniform3(LightPositionVariableName, new Vector3(camera.Position.X, camera.Position.Y, camera.Position.Z));
             SetUniform3(ViewPositionVariableName, new Vector3(camera.Position.X, camera.Position.Y, camera.Position.Z));
             SetUniform1(ShinenessVariableName, shininess);
+
+            // Új vektoros uniformok beküldése a shadernek
+            SetUniform3("uAmbientStrength", ambientStrength);
+            SetUniform3("uDiffuseStrength", diffuseStrength);
+            SetUniform3("uSpecularStrength", specularStrength);
+            SetUniform3("uAmbientLightColor", ambientLightColor);
 
             // Kamera és nézet beállítása
             var viewMatrix = Matrix4X4.CreateLookAt(camera.Position, camera.Target, camera.UpVector);
@@ -203,15 +215,19 @@ namespace GrafikaSzeminarium
             var projectionMatrix = Matrix4X4.CreatePerspectiveFieldOfView<float>((float)(Math.PI / 2), 1024f / 768f, 0.1f, 100f);
             SetMatrix(projectionMatrix, ProjectionMatrixVariableName);
 
+            // Hogy a színválasztó kontrollnak legyen látható hatása, kirajzoljuk a középső kockát is
+            var modelMatrixCenterCube = Matrix4X4.CreateScale((float)cubeArrangementModel.CenterCubeScale);
+            SetModelMatrix(modelMatrixCenterCube);
+            DrawModelObject(cube);
+
             // Z távolság kiszámítása a 18 elemű dézsához
-            // tan(10 fok) = (szélesség fele, azaz 0.5) / Z
             float angle10Rad = 10f * MathF.PI / 180f;
             float zDistance = 0.5f / MathF.Tan(angle10Rad);
 
             // 18 elem kirajzolása a körkörös alakzathoz
             for (int i = 0; i < 18; i++)
             {
-                // 20 fokos elfordulás elemenként
+                // 20 fokos elfordulás elemenként (az "i20f" elírás javítva "i * 20f"-re)
                 float rotationAngle = i * 20f * MathF.PI / 180f;
                 Matrix4X4<float> rotY = Matrix4X4.CreateRotationY(rotationAngle);
                 Matrix4X4<float> translateZ = Matrix4X4.CreateTranslation(0, 0, zDistance);
@@ -219,16 +235,35 @@ namespace GrafikaSzeminarium
                 // 1. Dézsa (Sík normálisok) - Eltolva felfelé az Y tengelyen
                 Matrix4X4<float> moveUp = Matrix4X4.CreateTranslation(0, 1.5f, 0);
                 SetModelMatrix(translateZ * rotY * moveUp);
-                DrawModelObject(flatBarrelRect); // Ügyelj rá, hogy a flatBarrelRect be legyen töltve a Load metódusban!
+                DrawModelObject(flatBarrelRect);
 
                 // 2. Dézsa (Simított normálisok) - Eltolva lefelé az Y tengelyen
                 Matrix4X4<float> moveDown = Matrix4X4.CreateTranslation(0, -1.5f, 0);
                 SetModelMatrix(translateZ * rotY * moveDown);
-                DrawModelObject(smoothBarrelRect); // Ügyelj rá, hogy a smoothBarrelRect be legyen töltve a Load metódusban!
+                DrawModelObject(smoothBarrelRect);
             }
 
-            ImGuiNET.ImGui.Begin("Lighting", ImGuiNET.ImGuiWindowFlags.AlwaysAutoResize | ImGuiNET.ImGuiWindowFlags.NoCollapse);
+            ImGuiNET.ImGui.Begin("Lighting & Properties", ImGuiNET.ImGuiWindowFlags.AlwaysAutoResize | ImGuiNET.ImGuiWindowFlags.NoCollapse);
+
             ImGuiNET.ImGui.SliderFloat("Shininess", ref shininess, 5, 100);
+            ImGuiNET.ImGui.Separator();
+
+            // 3 elemű vektorok módosítása (RGB / XYZ csúszkák)
+            ImGuiNET.ImGui.SliderFloat3("Ambient Vector", ref ambientStrength, 0f, 1f);
+            ImGuiNET.ImGui.SliderFloat3("Diffuse Vector", ref diffuseStrength, 0f, 1f);
+            ImGuiNET.ImGui.SliderFloat3("Specular Vector", ref specularStrength, 0f, 1f);
+            ImGuiNET.ImGui.Separator();
+
+            ImGuiNET.ImGui.SliderFloat3("Ambient Light Color", ref ambientLightColor, 0f, 1f);
+            ImGuiNET.ImGui.Separator();
+
+            // Központi kocka elülső lapjának színválasztója
+            if (ImGuiNET.ImGui.ColorEdit4("Front Face Color", ref frontFaceColor))
+            {
+                // Csak ha változik az érték, akkor írja felül a VBO-t a memóriában
+                cube.UpdateFrontFaceColor(frontFaceColor);
+            }
+
             ImGuiNET.ImGui.End();
 
             imGuiController.Render();
